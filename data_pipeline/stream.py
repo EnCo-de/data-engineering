@@ -35,7 +35,7 @@ def store_talks(stream):
             with  conn.cursor() as cur:
                 for values in stream:
                     # execute the INSERT statement
-                    cur.execute(sql, values)
+                    cur.execute(insert_query, values)
                     # get the generated id back                
                     fetch = cur.fetchone()
                     if fetch:
