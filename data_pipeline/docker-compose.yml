@@ -1,0 +1,39 @@
+services:
+    postgres:
+        image: postgres:16.4-alpine3.20
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=postgres
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+            start_period: 30s
+            interval: 20s
+            timeout: 10s
+            retries: 10
+        volumes:
+            - postgres-db-volume:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        networks:
+            - postgres-db-network
+
+    pypeline:
+        build: ./
+        depends_on:
+            postgres:
+                condition: service_healthy
+        command: ["python3", "app/stream.py"]
+        networks:
+            - postgres-db-network
+
+volumes:
+    postgres-db-volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ./data
+networks:
+    postgres-db-network:
+        driver: bridge
